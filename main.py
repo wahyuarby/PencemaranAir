@@ -73,6 +73,26 @@ if analysis_type == "Beranda (Home)":
         st.info("Statistik Deskriptif")
         st.dataframe(df.describe(), use_container_width=True)
 
+    st.markdown("---")if analysis_type == "Beranda (Home)":
+    st.header("Beranda: Gambaran Umum Dataset")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.info("Cuplikan Data (5 Teratas & 5 Terbawah)")
+        
+        # Menggabungkan 5 baris pertama dan 5 baris terakhir
+        preview_df = pd.concat([df.head(), df.tail()])
+        
+        # Menampilkan dataframe
+        st.dataframe(preview_df, use_container_width=True)
+        
+        st.write(f"**Dimensi Data:** {df.shape[0]} Baris, {df.shape[1]} Kolom")
+
+    with col2:
+        st.info("Statistik Deskriptif")
+        st.dataframe(df.describe(), use_container_width=True)
+
     st.markdown("---")
     
     # Visualisasi Distribusi Kelas (Pie Chart)
@@ -194,3 +214,4 @@ elif analysis_type == "Prediksi Potabilitas Air":
             st.write(f"Kemungkinan Layak Minum: **{prediction_proba[0][1]*100:.2f}%**")
 
             st.write(f"Kemungkinan Tidak Layak: **{prediction_proba[0][0]*100:.2f}%**")
+
