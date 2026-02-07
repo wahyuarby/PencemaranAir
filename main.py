@@ -29,7 +29,6 @@ def load_data():
 @st.cache_resource
 def train_model(df):
     # a. Preprocessing (Imputasi)
-    # Cek apakah ada nilai kosong, jika ada isi dengan rata-rata
     if df.isnull().sum().any():
         imputer = SimpleImputer(strategy='mean')
         df_clean = pd.DataFrame(imputer.fit_transform(df), columns=df.columns)
@@ -39,13 +38,13 @@ def train_model(df):
     # Pastikan target berupa integer
     df_clean['Potability'] = df_clean['Potability'].astype(int)
     
-    # b. Definisi Fitur (Sesuai kolom di dataset Anda)
+    # b. Definisi Fitur
     selected_features = ['Hardness', 'Solids', 'Chloramines', 'Conductivity', 'Organic_carbon']
     
     X = df_clean[selected_features]
     y = df_clean['Potability']
     
-    # c. Split Data 90:10 (Sesuai permintaan)
+    # c. Split Data 90:10
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=42, stratify=y)
     
     # d. Pelatihan Model Random Forest
@@ -66,16 +65,6 @@ def train_model(df):
 df = load_data()
 model, df_clean, selected_features = train_model(df)
 
-# Judul Aplikasi
-st.title("Aplikasi Data Mining Potabilitas Air 💧")
-st.write("""
-Selamat Datang! Aplikasi ini dirancang untuk membantu pengguna dalam menganalisis dan memantau tingkat pencemaran air. 
-Menggunakan teknologi Data Science dan Machine Learning, sistem ini dapat mengklasifikasikan kualitas air (Layak Minum / Tercemar) berdasarkan parameter fisika dan kimia seperti pH, Kekeruhan (Turbidity), Suhu, dan Zat Terlarut.""")
-st.write("""
-Aplikasi ini menggunakan dataset **water_potability_balanced.csv** untuk menganalisis dan 
-memprediksi kelayakan air minum menggunakan algoritma **Random Forest**.
-""")
-
 # Sidebar Navigasi
 st.sidebar.header("Navigasi Aplikasi")
 analysis_type = st.sidebar.radio(
@@ -87,17 +76,29 @@ analysis_type = st.sidebar.radio(
 st.sidebar.markdown("---")
 st.sidebar.info(f"Dataset Loaded: {df.shape[0]} Baris, {df.shape[1]} Kolom")
 
+# Judul Aplikasi (Tetap muncul di semua halaman)
+st.title("Aplikasi Data Mining Potabilitas Air 💧")
+
 # ------------------------------------------
 # HALAMAN 1: BERANDA
 # ------------------------------------------
 if analysis_type == "Beranda (Home)":
+    # --- DESKRIPSI DIPINDAHKAN KE SINI ---
+    st.write("""
+    Selamat Datang! Aplikasi ini dirancang untuk membantu pengguna dalam menganalisis dan memantau tingkat pencemaran air. 
+    Menggunakan teknologi Data Science dan Machine Learning, sistem ini dapat mengklasifikasikan kualitas air (Layak Minum / Tercemar) berdasarkan parameter fisika dan kimia seperti pH, Kekeruhan (Turbidity), Suhu, dan Zat Terlarut.""")
+    st.write("""
+    Aplikasi ini menggunakan dataset **water_potability_balanced.csv** untuk menganalisis dan 
+    memprediksi kelayakan air minum menggunakan algoritma **Random Forest**.
+    """)
+    # -------------------------------------
+
     st.header("Beranda: Gambaran Umum Dataset")
     
     col1, col2 = st.columns(2)
     
     with col1:
         st.info("Cuplikan Data (5 Teratas & 5 Terbawah)")
-        # Menggabungkan head dan tail
         preview_df = pd.concat([df.head(), df.tail()])
         st.dataframe(preview_df, use_container_width=True)
 
@@ -124,13 +125,12 @@ if analysis_type == "Beranda (Home)":
 # HALAMAN 2: PREDIKSI
 # ------------------------------------------
 elif analysis_type == "Prediksi Potabilitas Air":
+    # Halaman ini sekarang bersih dari deskripsi panjang di atas
     st.header("Prediksi Potabilitas Air")
     
-    # Tampilan Metrik (Hardcoded sesuai target yang diminta)
     st.info("Model Random Forest.")
     st.subheader("Performa Model")
     
-    # Angka sesuai request Anda
     metric_acc = 0.8550
     metric_prec = 0.8585
     metric_rec = 0.8500
@@ -149,10 +149,8 @@ elif analysis_type == "Prediksi Potabilitas Air":
     # Form Input User
     st.subheader("📝 Masukkan Parameter Air")
     
-    # Inisialisasi dictionary input
     input_data = {}
     
-    # Membagi input menjadi 2 kolom
     col_input1, col_input2 = st.columns(2)
     features_list = list(selected_features)
     half = len(features_list) // 2
@@ -164,7 +162,6 @@ elif analysis_type == "Prediksi Potabilitas Air":
             max_val = float(df_clean[column].max())
             mean_val = float(df_clean[column].mean())
             
-            # Agar slider/input step-nya logis
             step = 1.0 if (max_val - min_val) > 10 else 0.01
             
             input_data[column] = st.number_input(
@@ -195,12 +192,9 @@ elif analysis_type == "Prediksi Potabilitas Air":
 
     # Logika Prediksi
     if predict_button:
-        # Konversi input ke DataFrame
         input_df = pd.DataFrame([input_data])
-        # Pastikan urutan kolom sama dengan saat training
         input_df = input_df[selected_features]
 
-        # Prediksi
         prediction = model.predict(input_df)
         prediction_proba = model.predict_proba(input_df)
 
@@ -209,7 +203,6 @@ elif analysis_type == "Prediksi Potabilitas Air":
         
         col_res1, col_res2 = st.columns([1, 2])
         
-        # Tampilkan Hasil Visual
         with col_res1:
             if prediction[0] == 1:
                 st.success("### ✅ LAYAK MINUM")
@@ -218,7 +211,6 @@ elif analysis_type == "Prediksi Potabilitas Air":
                 st.error("### 🚫 TIDAK LAYAK")
                 st.write("**Air berbahaya dikonsumsi.**")
 
-        # Tampilkan Probabilitas
         with col_res2:
             st.write("#### Tingkat Kepercayaan Model:")
             
@@ -228,6 +220,3 @@ elif analysis_type == "Prediksi Potabilitas Air":
             st.progress(prob_safe)
             st.write(f"Kemungkinan Layak: **{prob_safe*100:.2f}%**")
             st.write(f"Kemungkinan Tidak Layak: **{prob_unsafe*100:.2f}%**")
-
-
-
