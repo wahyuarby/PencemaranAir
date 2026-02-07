@@ -29,6 +29,7 @@ def load_data():
 @st.cache_resource
 def train_model(df):
     # a. Preprocessing (Imputasi)
+    # Mengisi nilai kosong dengan rata-rata (penting terutama untuk pH yang sering kosong)
     if df.isnull().sum().any():
         imputer = SimpleImputer(strategy='mean')
         df_clean = pd.DataFrame(imputer.fit_transform(df), columns=df.columns)
@@ -38,10 +39,23 @@ def train_model(df):
     # Pastikan target berupa integer
     df_clean['Potability'] = df_clean['Potability'].astype(int)
     
-    # b. Definisi Fitur
-    selected_features = ['Hardness', 'Solids', 'Chloramines', 'Conductivity', 'Organic_carbon']
+    # b. Definisi Fitur (DITAMBAHKAN ph dan Turbidity)
+    # Pastikan nama kolom di CSV Anda sesuai (biasanya 'ph' lowercase atau 'pH')
+    # Di sini saya asumsikan nama kolom di CSV adalah 'ph' dan 'Turbidity'
+    selected_features = [
+        'ph', 
+        'Hardness', 
+        'Solids', 
+        'Chloramines', 
+        'Conductivity', 
+        'Organic_carbon', 
+        'Turbidity'
+    ]
     
-    X = df_clean[selected_features]
+    # Cek apakah kolom ada di dataframe untuk menghindari error
+    available_features = [col for col in selected_features if col in df_clean.columns]
+    
+    X = df_clean[available_features]
     y = df_clean['Potability']
     
     # c. Split Data 90:10
@@ -55,7 +69,7 @@ def train_model(df):
     )
     model.fit(X_train, y_train)
     
-    return model, df_clean, selected_features
+    return model, df_clean, available_features
 
 # ==========================================
 # EKSEKUSI PROGRAM UTAMA
@@ -83,7 +97,7 @@ st.title("Aplikasi Data Mining Potabilitas Air 💧")
 # HALAMAN 1: BERANDA
 # ------------------------------------------
 if analysis_type == "Beranda (Home)":
-    # --- DESKRIPSI DIPINDAHKAN KE SINI ---
+    # Deskripsi hanya muncul di Home
     st.write("""
     Selamat Datang! Aplikasi ini dirancang untuk membantu pengguna dalam menganalisis dan memantau tingkat pencemaran air. 
     Menggunakan teknologi Data Science dan Machine Learning, sistem ini dapat mengklasifikasikan kualitas air (Layak Minum / Tercemar) berdasarkan parameter fisika dan kimia seperti pH, Kekeruhan (Turbidity), Suhu, dan Zat Terlarut.""")
@@ -91,7 +105,6 @@ if analysis_type == "Beranda (Home)":
     Aplikasi ini menggunakan dataset **water_potability_balanced.csv** untuk menganalisis dan 
     memprediksi kelayakan air minum menggunakan algoritma **Random Forest**.
     """)
-    # -------------------------------------
 
     st.header("Beranda: Gambaran Umum Dataset")
     
@@ -125,12 +138,12 @@ if analysis_type == "Beranda (Home)":
 # HALAMAN 2: PREDIKSI
 # ------------------------------------------
 elif analysis_type == "Prediksi Potabilitas Air":
-    # Halaman ini sekarang bersih dari deskripsi panjang di atas
     st.header("Prediksi Potabilitas Air")
     
     st.info("Model Random Forest.")
     st.subheader("Performa Model")
     
+    # Metrik dummy (sesuai request sebelumnya)
     metric_acc = 0.8550
     metric_prec = 0.8585
     metric_rec = 0.8500
@@ -164,8 +177,11 @@ elif analysis_type == "Prediksi Potabilitas Air":
             
             step = 1.0 if (max_val - min_val) > 10 else 0.01
             
+            # Label khusus untuk pH agar lebih rapi
+            label = "pH Level" if column.lower() == 'ph' else column
+
             input_data[column] = st.number_input(
-                f"{column}",
+                f"{label}",
                 min_value=min_val, max_value=max_val, value=mean_val, step=step,
                 help=f"Range Nilai: {min_val:.1f} - {max_val:.1f}"
             )
@@ -178,9 +194,11 @@ elif analysis_type == "Prediksi Potabilitas Air":
             mean_val = float(df_clean[column].mean())
             
             step = 1.0 if (max_val - min_val) > 10 else 0.01
+
+            label = "pH Level" if column.lower() == 'ph' else column
             
             input_data[column] = st.number_input(
-                f"{column}",
+                f"{label}",
                 min_value=min_val, max_value=max_val, value=mean_val, step=step,
                 help=f"Range Nilai: {min_val:.1f} - {max_val:.1f}"
             )
@@ -193,6 +211,7 @@ elif analysis_type == "Prediksi Potabilitas Air":
     # Logika Prediksi
     if predict_button:
         input_df = pd.DataFrame([input_data])
+        # Pastikan urutan kolom sama dengan saat training
         input_df = input_df[selected_features]
 
         prediction = model.predict(input_df)
