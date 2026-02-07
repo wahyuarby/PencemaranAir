@@ -69,7 +69,9 @@ model, df_clean, selected_features = train_model(df)
 # Judul Aplikasi
 st.title("Aplikasi Data Mining Potabilitas Air 💧")
 st.write("""
-elamat Datang! Aplikasi ini dirancang untuk membantu pengguna dalam menganalisis dan memantau tingkat pencemaran air. Menggunakan teknologi Data Science dan Machine Learning, sistem ini dapat mengklasifikasikan kualitas air (Layak Minum / Tercemar) berdasarkan parameter fisika dan kimia seperti pH, Kekeruhan (Turbidity), Suhu, dan Zat Terlarut.
+Selamat Datang! Aplikasi ini dirancang untuk membantu pengguna dalam menganalisis dan memantau tingkat pencemaran air. 
+Menggunakan teknologi Data Science dan Machine Learning, sistem ini dapat mengklasifikasikan kualitas air (Layak Minum / Tercemar) berdasarkan parameter fisika dan kimia seperti pH, Kekeruhan (Turbidity), Suhu, dan Zat Terlarut.""")
+st.write("""
 Aplikasi ini menggunakan dataset **water_potability_balanced.csv** untuk menganalisis dan 
 memprediksi kelayakan air minum menggunakan algoritma **Random Forest**.
 """)
@@ -226,4 +228,5 @@ elif analysis_type == "Prediksi Potabilitas Air":
             st.progress(prob_safe)
             st.write(f"Kemungkinan Layak: **{prob_safe*100:.2f}%**")
             st.write(f"Kemungkinan Tidak Layak: **{prob_unsafe*100:.2f}%**")
+
 
