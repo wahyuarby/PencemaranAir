@@ -65,7 +65,7 @@ if analysis_type == "Beranda (Home)":
     
     with col1:
         st.info("5 Baris Pertama Data")
-        st.dataframe(df.head(), use_container_width=True)
+        st.dataframe(df.head(2367), use_container_width=True)
         
         st.write(f"**Dimensi Data:** {df.shape[0]} Baris, {df.shape[1]} Kolom")
 
@@ -192,4 +192,5 @@ elif analysis_type == "Prediksi Potabilitas Air":
             st.write("#### Probabilitas Kepercayaan Model:")
             st.progress(prediction_proba[0][1])
             st.write(f"Kemungkinan Layak Minum: **{prediction_proba[0][1]*100:.2f}%**")
+
             st.write(f"Kemungkinan Tidak Layak: **{prediction_proba[0][0]*100:.2f}%**")
