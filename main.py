@@ -127,7 +127,7 @@ elif analysis_type == "Prediksi Potabilitas Air":
     st.header("Prediksi Potabilitas Air")
     
     # Tampilan Metrik (Hardcoded sesuai target yang diminta)
-    st.info("Model Random Forest (Split Data 90:10) Siap Digunakan.")
+    st.info("Model Random Forest.")
     st.subheader("Performa Model")
     
     # Angka sesuai request Anda
@@ -228,5 +228,6 @@ elif analysis_type == "Prediksi Potabilitas Air":
             st.progress(prob_safe)
             st.write(f"Kemungkinan Layak: **{prob_safe*100:.2f}%**")
             st.write(f"Kemungkinan Tidak Layak: **{prob_unsafe*100:.2f}%**")
+
 
 
